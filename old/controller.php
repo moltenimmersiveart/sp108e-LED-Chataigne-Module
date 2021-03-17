@@ -60,7 +60,7 @@ $colors_orders = [
 ];
 
 function dec_to_even_hex($decimal, $make_it_2_bytes = false){
-	$decimal_in_hex= dechex($decimal);
+	$decimal_in_hex = dechex($decimal);
 	// echo $decimal_in_hex;
 	if($make_it_2_bytes){
 		$i = 4 - strlen($decimal_in_hex);

@@ -31,14 +31,31 @@ var myEnumParam = script.addEnumParameter("My Enum Param","Description of my enu
 //you can also declare custom internal variable
 //var myValue = 5;
 
+var CMD_NULL = [0,0,0];
+
+var CMD_PREFIX = 0x38;
+var CMD_SUFFIX = 0x83;
+var CMD_PIXELS = 0x2D;
+var CMD_SEGMENTS = 0x2E;
+var CMD_CHIP_TYPE = 0x1C;
+var CMD_LED_ORDER = 0x3C;
+var CMD_SET_COLOR = 0x22; // RGB: 000000-FFFFFF
+var CMD_SET_SPEED = 0x03; // Param: 00-FF
+var CMD_SET_BRIGHTNESS = 0x2A; // Param: 00-FF
+var CMD_SET_WHITE = 0x08; // Param: 00-FF
+var CMD_TOGGLE = 0xAA;
+var CMD_MIXED_AUTO_MODE = 0x06;
+var CMD_SET_ANIMATION = 0x2C; // Param: 00-FF
+
+
 /*
  The init() function will allow you to init everything you want after the script has been checked and loaded
  WARNING it also means that if you change values of your parameters by hand and set their values inside the init() function, they will be reset to this value each time the script is reloaded !
 */
 function init()
 {
-	local.parameters.input.setCollapsed(true);
-
+	setPixelsPerSegment(local.parameters.pixelsPerSegment.get());
+	setSegments(local.parameters.segments.get());
 	setChipType(local.parameters.chipType.get());
 	setColorOrder(local.parameters.colorOrder.get());
 
@@ -46,6 +63,11 @@ function init()
 	//myColorParam.set([1,.5,1,1]);	//for a color parameter, you need to pass an array with 3 (RGB) or 4 (RGBA) values.
 	//myP2DParam.set([1.5,-5]); // for a Point2D parameter, you need to pass 2 values (XY)
 	//myP3DParam.set([1.5,2,-3]); // for a Point3D parameter, you need to pass 3 values (XYZ)
+}
+
+function update(deltaTime)
+{
+	//script.log("updating");
 }
 
 /*
@@ -89,16 +111,28 @@ function moduleParameterChanged(param)
 
 	if(param.isParameter()) 
 	{
-		if(param.is(local.parameters.chipType)) 
+
+		if(param.is(local.parameters.pixelsPerSegment)) 
+		{
+			setPixelsPerSegment(param.get());
+		}
+		else if(param.is(local.parameters.segments))
+		{
+			setSegments(param.get());
+		}
+		else if(param.is(local.parameters.chipType))
 		{
 			setChipType(param.get());
-		} else if(param.is(local.parameters.colorOrder)) 
+		}
+		else if(param.is(local.parameters.colorOrder))
 		{
 			setColorOrder(param.get());
-		} else 
+		}
+		else
 		{
 			script.log("Module parameter changed : "+param.name+" > "+param.get());
 		}
+		
 	} else 
 	{
 		script.log("Module parameter triggered : "+param.name);	
@@ -156,38 +190,133 @@ function dataReceived(data)
 sp108e functions
 */
 
- function intToHex(int) {
-    return int.toString(16).padStart(2, "0");
+ function decToHex(dec, make2bytes) {
+
+ 	var hex = dec.toString(16);
+
+ 	if(make2bytes) {
+ 		hex.padStart(4, "0");
+    } else {
+    	hex.padStart(2, "0");
+    }
+
+    return hex;
   };
+
+
+function setSegments(segs){
+	script.log("Setting segments: " + segs);
+	sendMessage(pix, CMD_SEGMENTS, 2);	
+}
+
+function setPixelsPerSegment(pix){
+	script.log("Setting pixels per segment: " + pix);
+	sendMessage(pix, CMD_PIXELS, 2);
+}
+
 
 function setChipType(type){
 	script.log("Setting chip type: " + type);
-	local.send("38 " + type + " 0000 1c 83");
+	sendMessage(type, CMD_CHIP_TYPE, 1);
 }
 
 function setColorOrder(order){
 	script.log("Setting color order: " + order);
-	local.send("38 " + order + " 0000 3c 83");
+	sendMessage(order, CMD_LED_ORDER, 1);
+}
+
+/*
+function change_mixed_colors_animation(index){
+	// 0x00 (first animation 1) -> 0xb3 (last animation 180)
+	//send_data("38" + dec_to_even_hex(index - 1) +"0000 2c 83"); // specific animation
+}
+
+function enable_multicolor_animation_auto_mode(){
+	local.send("38 000000 06 83"); // auto mode
+}
+*/
+
+function toggleOffOn(){
+	script.log("Toggle off on");
+	sendMessage(CMD_NULL, CMD_TOGGLE);
 }
 
 function setColor(color) {
 	script.log("Setting color: " + color);
+	sendMessage(color, CMD_SET_COLOR);
+}
+
+function setBrightness(value) {
+	script.log("Setting brigthness: " + value);
+	sendMessage(value, CMD_SET_BRIGHTNESS, 1);
+}
+
+function setSpeed(value) {
+	script.log("Setting speed: " + value);
+	sendMessage(value, CMD_SET_SPEED, 1);
 }
 
 function setAnimation(value) {
 	script.log("Setting animation: " + value);
 }
 
-function setBrightness(value) {
-	script.log("Setting brigthness: " + value);
-	value = intToHex(value);
-	scipt.log("sending: " + value);
-	local.send("38 " + value + " 0000 2a 83");
+function sendMessage(msg, command, bytes)
+{
+	script.log("---");
+	script.log("sending: " + msg);
+
+	if(bytes) {
+		msg = parseDecimal(msg, bytes);
+	} else {
+		script.log("messgage bytes undefined, sending as is.");
+	}
+
+	local.sendBytes(CMD_PREFIX, msg, command, CMD_SUFFIX);
 }
 
-function setSpeed(value) {
-	script.log("Setting speed: " + value);
-	value = intToHex(value);
-	scipt.log("sending: " + value);
-	local.send("38 " + value + " 0000 03 83");
+function parseDecimal(msg, bytes) {
+	//msg = msg.toString();
+	//msg = msg.padStart(6, "0");
+	//if 0 do nothing
+	//if 1 convert to hex, return array [v,0,0]
+	//if 2 convert to hex, return array [v1,v2,0]
+	//if 3 convert to hex, return array [v1, v2, v3]
+
+
+	if(bytes > 0) {
+
+		//var v1, v2, v3 = 0;
+		//msg = msg.toString(16).padEnd(6, "0");
+
+		var m = msg.toString(16);
+		script.log("toString:  " + m);
+
+		//split hex into array
+
+		/*
+		if(bytes == 1) 
+		{	
+			v1 = ;
+		} 
+		else if (bytes == 2) 
+		{
+			v1 = ;
+			v2 = ;
+		} 
+		else if (bytes == 3) {
+			v1 = ;
+			v2 = ;
+			v2 = ;
+		} 
+
+		msg = [v1, v2, v3];
+		*/
+
+	} else {
+		//do nothing
+	}
+
+
+	script.log("message has " + bytes + " bytes.");
+	return msg;
 }

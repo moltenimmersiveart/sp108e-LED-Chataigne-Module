@@ -1,6 +1,6 @@
 {
 	"name": "sp108e Wifi LED control",
-	"type": "UDP",
+	"type": "TCP Client",
 	"path": "Hardware",
 	
 	"version": "0.0.1",
@@ -8,12 +8,27 @@
 	"url":"https://github.com/moltenryan/",
 	"downloadURL": "https://github.com/moltenryan/",
 
-	"hasInput": false,
+	"hasInput": true,
 	"hasOutput": true, 
 	"hideDefaultCommands": true,
 
 	"parameters": 
 	{
+		"Pixels Per Segment":
+		{
+			"type":"Integer",
+			"default":10,
+			"min":0,
+		},
+
+		"Segments":
+		{
+			"type":"Integer",
+			"default":1,
+			"min":1,
+			"max":300
+		},
+
 		"Chip Type": 
 		{
 			"type":"Enum",
@@ -48,6 +63,7 @@
 				"P9412":"1a"
 			}
 		},
+
 		"Color Order": 
 		{
 			"type":"Enum",
@@ -98,7 +114,7 @@
 	
 	"commands": 
 	{
-		"Color":
+		"Set Color":
 		{
 			"menu":"",
 			"callback":"setColor",
@@ -155,7 +171,7 @@
 		"Set Animation Speed":
 		{
 			"menu":"",
-			"callback":"setSpeed",
+			"callback":"setAnimationSpeed",
 			"parameters":
 			{
 				"Brightness":
@@ -168,5 +184,10 @@
 			}
 		},
 
+		"Toggle Off On":
+		{
+			"menu":"",
+			"callback":"toggleOffOn",
+		},
 	}
 }
