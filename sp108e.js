@@ -190,20 +190,6 @@ function dataReceived(data)
 sp108e functions
 */
 
- function decToHex(dec, make2bytes) {
-
- 	var hex = dec.toString(16);
-
- 	if(make2bytes) {
- 		hex.padStart(4, "0");
-    } else {
-    	hex.padStart(2, "0");
-    }
-
-    return hex;
-  };
-
-
 function setSegments(segs){
 	script.log("Setting segments: " + segs);
 	sendMessage(pix, CMD_SEGMENTS, 2);	
@@ -217,12 +203,12 @@ function setPixelsPerSegment(pix){
 
 function setChipType(type){
 	script.log("Setting chip type: " + type);
-	sendMessage(type, CMD_CHIP_TYPE, 1);
+	sendMessage(oneByte(type), CMD_CHIP_TYPE, 1);
 }
 
 function setColorOrder(order){
 	script.log("Setting color order: " + order);
-	sendMessage(order, CMD_LED_ORDER, 1);
+	sendMessage(oneByte(order), CMD_LED_ORDER, 1);
 }
 
 /*
@@ -243,80 +229,40 @@ function toggleOffOn(){
 
 function setColor(color) {
 	script.log("Setting color: " + color);
-	sendMessage(color, CMD_SET_COLOR);
+	sendMessage(colorToHex(color), CMD_SET_COLOR);
 }
 
 function setBrightness(value) {
 	script.log("Setting brigthness: " + value);
-	sendMessage(value, CMD_SET_BRIGHTNESS, 1);
+	sendMessage(oneByte(value), CMD_SET_BRIGHTNESS);
 }
 
 function setSpeed(value) {
 	script.log("Setting speed: " + value);
-	sendMessage(value, CMD_SET_SPEED, 1);
+	sendMessage(oneByte(value), CMD_SET_SPEED);
 }
 
 function setAnimation(value) {
 	script.log("Setting animation: " + value);
 }
 
-function sendMessage(msg, command, bytes)
+//message is in the format of [255, 255, 255]
+function sendMessage(msg, command)
 {
-	script.log("---");
-	script.log("sending: " + msg);
-
-	if(bytes) {
-		msg = parseDecimal(msg, bytes);
-	} else {
-		script.log("messgage bytes undefined, sending as is.");
-	}
-
+	script.log("----> sending: " + msg);
 	local.sendBytes(CMD_PREFIX, msg, command, CMD_SUFFIX);
 }
 
-function parseDecimal(msg, bytes) {
-	//msg = msg.toString();
-	//msg = msg.padStart(6, "0");
-	//if 0 do nothing
-	//if 1 convert to hex, return array [v,0,0]
-	//if 2 convert to hex, return array [v1,v2,0]
-	//if 3 convert to hex, return array [v1, v2, v3]
+//converts normalized colour to hex
+function colorToHex(col) {
+	return [col[0] * 255, col[1] * 255, col[2] * 255];
+}
 
+function oneByte(b) {
+	return [b, 0, 0];
+}
 
-	if(bytes > 0) {
-
-		//var v1, v2, v3 = 0;
-		//msg = msg.toString(16).padEnd(6, "0");
-
-		var m = msg.toString(16);
-		script.log("toString:  " + m);
-
-		//split hex into array
-
-		/*
-		if(bytes == 1) 
-		{	
-			v1 = ;
-		} 
-		else if (bytes == 2) 
-		{
-			v1 = ;
-			v2 = ;
-		} 
-		else if (bytes == 3) {
-			v1 = ;
-			v2 = ;
-			v2 = ;
-		} 
-
-		msg = [v1, v2, v3];
-		*/
-
-	} else {
-		//do nothing
-	}
-
-
-	script.log("message has " + bytes + " bytes.");
-	return msg;
+//converts decimal to 3 byte array
+function toBytes(val) {
+	return val;
 }
