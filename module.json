@@ -216,7 +216,7 @@
 			"callback":"setAnimationSpeed",
 			"parameters":
 			{
-				"Brightness":
+				"Speed":
 				{
 					"type":"Integer",
 					"default":100,

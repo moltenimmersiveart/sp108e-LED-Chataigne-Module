@@ -161,35 +161,6 @@ function moduleValueChanged(value)
 	}
 }
 
-/* ********** STREAMING MODULE (UDP, SERIAL) SPECIFIC SCRIPTING ********************* */
-/*
-
-Streaming Modules (i.e. UDP and Serial Module) have specific methods that can be used to handle receiving and sendin data over the connection.
-With streaming modules, there are 2 ways of sending data : either as a UTF-8 String or as separate bytes
-
-local.send("This is my message"); //This will send the string passed in as ASCII characters 
-local.sendBytes(30,210,46,255,10); //This will send all the bytes passed in as they are
-
-*/
-
-/*
-You can intercept all the received data from this module with the method dataReceived(data).
-Depending on the Protocol you chose, the nature of the data passed in this function will be different.
-*/
-/*
-function dataReceived(data)
-{
-	//If mode is "Lines", you can expect data to be a single line String
-	script.log("Data received : " +data);
-
-	//If mode is anything else, you can expect data to be an array of bytes
-	script.log("Bytes received : "+data.length);
-	for(var i=0; i < data.length; i++)
-	{
-		script.log(" > " + data[i]);
-	}
-}
-*/
 
 /*
 sp108e functions
@@ -197,12 +168,12 @@ sp108e functions
 
 function setSegments(segs){
 	script.log("Setting segments: " + segs);
-	updateMessage(toBytes(segs), CMD_SEGMENTS, 2);	
+	updateMessage(intToRGB(segs), CMD_SEGMENTS, 2);	
 }
 
 function setPixelsPerSegment(pix){
 	script.log("Setting pixels per segment: " + pix);
-	updateMessage(toBytes(pix), CMD_PIXELS, 2);
+	updateMessage(intToRGB(pix), CMD_PIXELS, 2);
 }
 
 function setChipType(type){
@@ -222,7 +193,7 @@ function toggleOffOn(){
 
 function setColor(color) {
 	script.log("Setting color: " + color);
-	updateMessage(colorToBytes(color), CMD_SET_COLOR);
+	updateMessage(normalizedToRGB(color), CMD_SET_COLOR);
 }
 
 function setBrightness(value) {
@@ -230,7 +201,7 @@ function setBrightness(value) {
 	updateMessage(oneByte(value), CMD_SET_BRIGHTNESS);
 }
 
-function setSpeed(value) {
+function setAnimationSpeed(value) {
 	script.log("Setting speed: " + value);
 	updateMessage(oneByte(value), CMD_SET_SPEED);
 }
@@ -257,7 +228,7 @@ function sendMessage(msg, cmd)
 }
 
 //converts normalized colour to hex
-function colorToBytes(col) {
+function normalizedToRGB(col) {
 	return [col[0] * 255, col[1] * 255, col[2] * 255];
 }
 
@@ -265,24 +236,19 @@ function oneByte(b) {
 	return [b, 0, 0];
 }
 
-//converts decimal to 3 byte array
-function toBytes(val) {
 
-	script.log("toBytes val: " +  val);
-	//val = val.toHexString(16);
-	//val = rgbToHex(val);
+function intToRGB(c) {
 
-	val = toHexString(val, 16);
+	var b = Math.floor(c / (256*256));
+	var g = Math.floor(c / 256) % 256;
+	var r = c % 256;
 
-	script.log("toBytes val now: " + val);
-
-
-
-	var v1, v2, v3 = 0;
-
-	//convert to hex
-
-	//split into array
-
-	return [v1, v2, v3];
+	/*
+    var b = c % 256,
+        g_0 = (c % 65536 - b),
+        r_0 = c - g_0 - b,
+        g = g_0 / 256,
+        r = r_0 / 65536;
+*/
+    return [r, g, b];
 }
