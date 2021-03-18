@@ -10,4 +10,4 @@ https://www.npmjs.com/package/sp108e
 
 ## How to use
 
-Use the LED Shop app to configure the device and assign its IP. Set this IP to be the Remote Host in Chataigne.
+Use the LED Shop app to configure the sp108e for your network. Set its assigned IP as the Remote Host in Chataigne.

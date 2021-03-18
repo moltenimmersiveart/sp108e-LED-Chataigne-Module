@@ -47,6 +47,10 @@ var CMD_TOGGLE = 0xAA;
 var CMD_MIXED_AUTO_MODE = 0x06;
 var CMD_SET_ANIMATION = 0x2C; // Param: 00-FF
 
+var message = CMD_NULL;
+var command = 0x00;
+var canSend = false;
+
 
 /*
  The init() function will allow you to init everything you want after the script has been checked and loaded
@@ -54,6 +58,8 @@ var CMD_SET_ANIMATION = 0x2C; // Param: 00-FF
 */
 function init()
 {
+	//script.setUpdateRate(50);
+
 	setPixelsPerSegment(local.parameters.pixelsPerSegment.get());
 	setSegments(local.parameters.segments.get());
 	setChipType(local.parameters.chipType.get());
@@ -65,10 +71,6 @@ function init()
 	//myP3DParam.set([1.5,2,-3]); // for a Point3D parameter, you need to pass 3 values (XYZ)
 }
 
-function update(deltaTime)
-{
-	//script.log("updating");
-}
 
 /*
  This function will be called each time a parameter of your script has changed
@@ -85,12 +87,15 @@ function scriptParameterChanged(param)
 /*
  This function, if you declare it, will launch a timer at 50hz, calling this method on each tick
 */
-/*
+
 function update(deltaTime)
 {
-	script.log("Update : "+util.getTime()+", delta = "+deltaTime); //deltaTime is the time between now and last update() call, util.getTime() will give you a timestamp relative to either the launch time of the software, or the start of the computer.
+	//limit number of messages to update rate
+	if(canSend) {
+		sendMessage(message, command);
+	}
 }
-*/
+
 
 
 
@@ -171,7 +176,7 @@ local.sendBytes(30,210,46,255,10); //This will send all the bytes passed in as t
 You can intercept all the received data from this module with the method dataReceived(data).
 Depending on the Protocol you chose, the nature of the data passed in this function will be different.
 */
-
+/*
 function dataReceived(data)
 {
 	//If mode is "Lines", you can expect data to be a single line String
@@ -184,7 +189,7 @@ function dataReceived(data)
 		script.log(" > " + data[i]);
 	}
 }
-
+*/
 
 /*
 sp108e functions
@@ -192,69 +197,67 @@ sp108e functions
 
 function setSegments(segs){
 	script.log("Setting segments: " + segs);
-	sendMessage(pix, CMD_SEGMENTS, 2);	
+	updateMessage(toBytes(segs), CMD_SEGMENTS, 2);	
 }
 
 function setPixelsPerSegment(pix){
 	script.log("Setting pixels per segment: " + pix);
-	sendMessage(pix, CMD_PIXELS, 2);
+	updateMessage(toBytes(pix), CMD_PIXELS, 2);
 }
-
 
 function setChipType(type){
 	script.log("Setting chip type: " + type);
-	sendMessage(oneByte(type), CMD_CHIP_TYPE, 1);
+	updateMessage(oneByte(type), CMD_CHIP_TYPE, 1);
 }
 
 function setColorOrder(order){
 	script.log("Setting color order: " + order);
-	sendMessage(oneByte(order), CMD_LED_ORDER, 1);
+	updateMessage(oneByte(order), CMD_LED_ORDER, 1);
 }
-
-/*
-function change_mixed_colors_animation(index){
-	// 0x00 (first animation 1) -> 0xb3 (last animation 180)
-	//send_data("38" + dec_to_even_hex(index - 1) +"0000 2c 83"); // specific animation
-}
-
-function enable_multicolor_animation_auto_mode(){
-	local.send("38 000000 06 83"); // auto mode
-}
-*/
 
 function toggleOffOn(){
 	script.log("Toggle off on");
-	sendMessage(CMD_NULL, CMD_TOGGLE);
+	updateMessage(CMD_NULL, CMD_TOGGLE);
 }
 
 function setColor(color) {
 	script.log("Setting color: " + color);
-	sendMessage(colorToHex(color), CMD_SET_COLOR);
+	updateMessage(colorToBytes(color), CMD_SET_COLOR);
 }
 
 function setBrightness(value) {
 	script.log("Setting brigthness: " + value);
-	sendMessage(oneByte(value), CMD_SET_BRIGHTNESS);
+	updateMessage(oneByte(value), CMD_SET_BRIGHTNESS);
 }
 
 function setSpeed(value) {
 	script.log("Setting speed: " + value);
-	sendMessage(oneByte(value), CMD_SET_SPEED);
+	updateMessage(oneByte(value), CMD_SET_SPEED);
 }
 
 function setAnimation(value) {
 	script.log("Setting animation: " + value);
+	updateMessage(oneByte(value), CMD_SET_ANIMATION);
 }
 
 //message is in the format of [255, 255, 255]
-function sendMessage(msg, command)
+function updateMessage(msg, cmd)
+{
+	//local.sendBytes(CMD_PREFIX, msg, command, CMD_SUFFIX);
+	message = msg;
+	command = cmd;
+	canSend = true;
+}
+
+function sendMessage(msg, cmd)
 {
 	script.log("----> sending: " + msg);
-	local.sendBytes(CMD_PREFIX, msg, command, CMD_SUFFIX);
+	local.sendBytes(CMD_PREFIX, msg, cmd, CMD_SUFFIX);
+	canSend = false;
 }
 
 //converts normalized colour to hex
-function colorToHex(col) {
+function colorToBytes(col) {
 	return [col[0] * 255, col[1] * 255, col[2] * 255];
 }
 
@@ -264,5 +267,22 @@ function oneByte(b) {
 
 //converts decimal to 3 byte array
 function toBytes(val) {
-	return val;
+
+	script.log("toBytes val: " +  val);
+	//val = val.toHexString(16);
+	//val = rgbToHex(val);
+
+	val = toHexString(val, 16);
+
+	script.log("toBytes val now: " + val);
+
+
+
+	var v1, v2, v3 = 0;
+
+	//convert to hex
+
+	//split into array
+
+	return [v1, v2, v3];
 }
