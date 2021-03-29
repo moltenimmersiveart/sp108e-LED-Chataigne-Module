@@ -3,7 +3,7 @@
 	"type": "TCP Client",
 	"path": "Hardware",
 	
-	"version": "0.0.1",
+	"version": "0.1",
 	"description": "Control sp108e Wifi LED controllers ",
 	"url":"https://github.com/moltenryan/",
 	"downloadURL": "https://github.com/moltenryan/",
