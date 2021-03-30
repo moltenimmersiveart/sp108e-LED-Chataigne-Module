@@ -5,8 +5,8 @@
 	
 	"version": "0.1",
 	"description": "Control sp108e Wifi LED controllers ",
-	"url":"https://github.com/moltenryan/",
-	"downloadURL": "https://github.com/moltenryan/",
+	"url":"https://github.com/moltenimmersiveart/sp108e-LED-Chataigne-Module",
+	"downloadURL": "https://github.com/moltenimmersiveart/sp108e-LED-Chataigne-Module",
 
 	"hasInput": true,
 	"hasOutput": true, 
@@ -165,7 +165,8 @@
 						"Static":211,
 						"Stack":207,
 						"Flash":210,
-						"Flow":208
+						"Flow":208,
+						"Custom":219
 					}
 				}
 			}

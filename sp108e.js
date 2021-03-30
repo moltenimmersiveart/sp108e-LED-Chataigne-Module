@@ -46,6 +46,7 @@ var CMD_SET_WHITE = 0x08; // Param: 00-FF
 var CMD_TOGGLE = 0xAA;
 var CMD_MIXED_AUTO_MODE = 0x06;
 var CMD_SET_ANIMATION = 0x2C; // Param: 00-FF
+var CMD_CUSTOM_EFFECT = 0x02;
 
 var message = CMD_NULL;
 var command = 0x00;
