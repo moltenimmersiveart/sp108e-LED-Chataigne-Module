@@ -212,6 +212,11 @@ function setAnimation(value) {
 	updateMessage(oneByte(value), CMD_SET_ANIMATION);
 }
 
+function setSavedAnimation(value) {
+	script.log("Setting animation: " + value);
+	updateMessage(oneByte(value), CMD_CUSTOM_EFFECT);
+}
+
 //message is in the format of [255, 255, 255]
 function updateMessage(msg, cmd)
 {

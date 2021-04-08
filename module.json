@@ -190,23 +190,16 @@
 		"Set Saved Animation":
 		{
 			"menu":"",
-			"callback":"setAnimation",
+			"callback":"setSavedAnimation",
 			"parameters":
 			{
 				"Preset":
 				{
-					"type":"Enum",
-					"options":
-					{
-						"Preset 1":205,
-						"Breathing":206,
-						"Wave":209,
-						"Catch up":212,
-						"Static":211,
-						"Stack":207,
-						"Flash":210,
-						"Flow":208
-					}
+					"type":"Integer",
+					"default":1,
+					"min":1,
+					"max":12,
+					"useForMapping": false
 				}
 			}
 		},
